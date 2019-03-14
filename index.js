@@ -6,16 +6,6 @@ const { DataError } = require('./UserDefineError/dataError');
 const util = require('./util/commonUtil');
 const constdata = require('./util/constdata');
 
-// const {
-//   DB2DATABASE,
-//   DB2HOSTNAME,
-//   DB2UID,
-//   DB2PWD,
-//   DB2PORT,
-// } = process.env;
-
-// const DB2CONNECTSTRING = `DATABASE=${DB2DATABASE};HOSTNAME=${DB2HOSTNAME};UID=${DB2UID};PWD=${DB2PWD};PORT=${DB2PORT};PROTOCOL=TCPIP`;
-
 class Database {
   constructor(connectstr, uuid) {
     this.db2conn = ibmdb.openSync(connectstr);
