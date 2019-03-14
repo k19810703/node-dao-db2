@@ -1,0 +1,63 @@
+{
+  "name": "@cic-digital/node-dao-db2",
+  "version": "0.0.2",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --coverage --env=node",
+    "check": "eslint --ignore-path .eslintignore --quiet \"./**/*.js\""
+  },
+  "jest": {
+    "coverageThreshold": {
+      "global": {
+        "branches": 100,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
+      }
+    },
+    "collectCoverageFrom": [
+      "**/*.{js,jsx}",
+      "!**/node_modules/**",
+      "!**/coverage/**",
+      "!**/util/db2class.js",
+      "!**/testutil/**"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/k19810703/node-dao-db2.git"
+  },
+  "keywords": [
+    "node",
+    "db2"
+  ],
+  "author": "wuhd <k19810703@163.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/k19810703/node-dao-db2/issues"
+  },
+  "dependencies": {
+    "connect-db2": "^0.6.0",
+    "ibm_db": "^2.5.0",
+    "lodash": "^4.17.11",
+    "log": "^1.4.0",
+    "moment": "^2.22.2",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "eslint": "^5.13.0",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-angular": "^4.0.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-jsx-a11y": "^6.2.0",
+    "eslint-plugin-react": "^7.12.4",
+    "jest": "^24.1.0",
+    "superagent": "^4.0.0",
+    "supertest": "^3.3.0"
+  },
+  "homepage": "https://github.com/k19810703/node-dao-db2#readme"
+}
