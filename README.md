@@ -4,6 +4,11 @@
 
 ### 用法
 
+####  install
+```
+npm install --save @cic-digital/node-dao-db2
+```
+
 ####  接口一览
 *   beginTransaction
 *   insertByData
