@@ -1,6 +1,6 @@
 # node-db2数据访问组件
 
-##  node-db2数据访问组件
+##  node-db2数据访问组件,方便用户快速构建db2数据库访问模块,提高程序的可读性
 
 ### 用法
 
@@ -47,3 +47,4 @@ database.selectByCondition('YOURTABLENAME', {
   .then(result => console.log(result))
   .catch(error => console.log(error));
 ```
+默认情况下会有日志输出在console，如果你希望有日志，请设置环境变量LogLevel=Info

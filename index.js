@@ -15,7 +15,7 @@ class Database {
 
   beginTransaction() {
     return new Promise((resolve, reject) => {
-      log.info(this.uuid, 'transaction開始');
+      log.debug(this.uuid, 'transaction開始');
       this.db2conn.beginTransaction((err) => {
         if (err) {
           return reject(new DB2Error('beginTransaction', err, this));
@@ -27,7 +27,7 @@ class Database {
   }
 
   async insertByData(table, data) {
-    log.info(this.uuid, 'insertByData', table, data);
+    log.debug(this.uuid, 'insertByData', table, data);
     let insertresult;
     if (data.length === 0) {
       throw new DataError(`insertByData for Table(${table}) with no data`);
@@ -53,9 +53,9 @@ class Database {
     return data instanceof Array ? insertresult : insertresult[0];
   }
 
-  async selectByKey(table, key) {
-    log.info(this.uuid, 'selectByKey', table, key);
-    const result = await this.selectByCondition(table, key);
+  async selectByKey(table, key, ifLock) {
+    log.debug(this.uuid, 'selectByKey', table, key);
+    const result = await this.selectByCondition(table, key, ifLock);
     if (result.length !== 1) {
       throw new DataError(`selectByKey for Table(${table}) with condition ${JSON.stringify(key)} got ${result.length} record, responsdata can be found in errordata field`, result );
     }
@@ -63,9 +63,9 @@ class Database {
   }
 
   async deleteByKey(table, key) {
-    log.info(this.uuid, 'selectByKey', table, key);
-    this.executeSql('a', 'b');
-    return '';
+    log.debug(this.uuid, 'deleteByKey', table, key);
+    await this.deleteByCondition(table, key);
+    return null;
   }
 
   async updateByKey(table, key) {
@@ -74,21 +74,21 @@ class Database {
   }
 
   async selectByCondition(table, condition, orderkeys, ifLock) {
-    log.info(this.uuid, 'selectByCondition');
-    log.info(table, condition, orderkeys, ifLock);
+    log.debug(this.uuid, 'selectByCondition');
+    log.debug(table, condition, orderkeys, ifLock);
     const ordersql = orderkeys instanceof Array ? util.filedsarray2Order(orderkeys) : '';
     const localIfLock = orderkeys instanceof Array ? ifLock : orderkeys;
     const locksql = localIfLock ? constdata.sqlLockString : '';
-    log.info(this.uuid, 'selectByCondition', table, condition);
+    log.debug(this.uuid, 'selectByCondition', table, condition);
     const preparedata = util.data2Where(condition);
     const sql = `select * FROM ${table} ${preparedata.wherecondition} ${ordersql} ${locksql}`;
     const result = await this.executeSql(sql, preparedata.sqlparam);
-    log.info(result);
+    log.debug(result);
     return preparedata ? result : [];
   }
 
   async updateByCondition(table, setkey, condition) {
-    log.info(this.uuid, 'updateByCondition', setkey, condition);
+    log.debug(this.uuid, 'updateByCondition', setkey, condition);
     this.executeSql('a', 'b');
     return '';
   }
@@ -96,9 +96,9 @@ class Database {
   // 删除talbe中符合condition对象条件的数据
   // 如{a:1 , b:2} => where a=1 and b=2
   async deleteByCondition(table, condition) {
-    log.info(this.uuid, 'deleteByCondition', table, condition);
+    log.debug(this.uuid, 'deleteByCondition', table, condition);
     const preparedata = util.data2Where(condition);
-    log.info(preparedata);
+    log.debug(preparedata);
     const sql = `delete FROM ${table} ${preparedata.sqlwhere}`;
     const result = await this.executeSql(sql, preparedata.sqlparam);
     return preparedata ? result : [];
@@ -107,9 +107,9 @@ class Database {
   executeSql(sql, data) {
     return new Promise((resolve, reject) => {
       const params = data || [];
-      log.info(this.uuid, 'sql:', sql, 'params:', params);
+      log.debug(this.uuid, 'sql:', sql, 'params:', params);
       this.db2conn.query(sql, params, (error, rows, sqlca) => {
-        log.info(this.uuid, sqlca);
+        log.debug(this.uuid, sqlca);
         if (error) {
           return reject(new DB2Error('executeSql', error, this, sql, data));
         }
@@ -120,7 +120,7 @@ class Database {
 
   rollBack() {
     return new Promise((resolve, reject) => {
-      log.info(this.uuid, 'rollBack');
+      log.debug(this.uuid, 'rollBack');
       this.db2conn.rollbackTransaction((error) => {
         if (error) {
           return reject(new DB2Error('rollBack', error, this));
@@ -133,7 +133,7 @@ class Database {
   commitTransaction() {
     return new Promise((resolve, reject) => {
       if (!this.transaction) {
-        log.info(this.uuid, 'no transcation found, just close the connection');
+        log.debug(this.uuid, 'no transcation found, just close the connection');
         this.db2conn.close((closeerr) => {
           if (closeerr) {
             return reject(new DB2Error('commitTransaction', closeerr));
@@ -141,13 +141,13 @@ class Database {
           return resolve('');
         });
       }
-      log.info(this.uuid, 'commit開始');
+      log.debug(this.uuid, 'commit開始');
       this.db2conn.commitTransaction((err) => {
         if (err) {
           return reject(new DB2Error('commitTransaction', err));
         }
         log.error(err);
-        log.info('close db2 connection');
+        log.debug('close db2 connection');
         this.db2conn.close((closeerr) => {
           if (closeerr) {
             return reject(new DB2Error('commitTransaction', closeerr));
