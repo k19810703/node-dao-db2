@@ -32,6 +32,11 @@ class People extends DataModel {
     // 表的自动设置字段名(比如id，timestamp)，字符型数组，不分先后
     this.autosetfields = ['ID'];
   }
+
+  // 内置方法不够的时候，你可以自己定义接口
+  function custormizeMethod() {
+
+  };
 }
 ```
 
@@ -41,15 +46,24 @@ const { Database } = require('@cic-digital/node-dao-db2');
 const { People } = require('./People');
 
 async function mybizprocess(){
+  // 数据库连接串，可以定义在环境变量
   const DB2CONNECTSTRING = 'db2 connect string';
+  // 创建数据库实例
   const database = new Database(DB2CONNECTSTRING);
+  // 创建people实例
   const people = new People(database);
+  // 如果需要transaction，开始transaction
   await database.beginTransaction();
-  const zhansan = await people.create({NAME: 'ZHANGSAN', AGE: 12});
-  const lisi = await people.create({NAME: 'LISI', AGE: 21});
+  // 创建张三记录
+  const zhansan = await people.create({NAME: '张三', AGE: 12});
+  // 创建李四记录
+  const lisi = await people.create({NAME: '李四', AGE: 21});
+  // 删除id=2
   await people.delete({ID: 2});
+  // 如果有transaction，提交transaction
   await database.commitTransaction();
-
 }
 ```
 默认情况下没有日志输出在console，如果你希望有日志，请设置环境变量LogLevel=Debug
+
+内置方法使用说明
