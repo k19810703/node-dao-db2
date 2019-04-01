@@ -46,7 +46,7 @@
     "log": "^1.4.0",
     "moment": "^2.22.2",
     "string-format": "^2.0.0",
-    "uuid": "^3.3.2",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
