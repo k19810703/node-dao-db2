@@ -33,7 +33,7 @@ class People extends DataModel {
     this.autosetfields = ['ID'];
   }
 
-  // 内置方法不够的时候，你可以自己定义接口
+  // 内置方法不够用咋整，不要慌，你可以自己定义接口
   function custormizeMethod() {
 
   };

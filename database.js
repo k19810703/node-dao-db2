@@ -1,162 +1,104 @@
 const ibmdb = require('ibm_db');
 const uuidv4 = require('uuid/v4');
 const { log } = require('./util/log');
-const { DB2Error } = require('./UserDefineError/db2Error');
-const { DataError } = require('./UserDefineError/dataError');
-const util = require('./util/commonUtil');
-const constdata = require('./util/constdata');
+
+const {
+  DB2DATABASE,
+  DB2HOSTNAME,
+  DB2UID,
+  DB2PWD,
+  DB2PORT,
+} = process.env;
+
+const DB2CONNECTSTRING = `DATABASE=${DB2DATABASE};HOSTNAME=${DB2HOSTNAME};UID=${DB2UID};PWD=${DB2PWD};PORT=${DB2PORT};PROTOCOL=TCPIP`;
 
 class Database {
-  constructor(connectstr, uuid) {
-    this.db2conn = ibmdb.openSync(connectstr);
+  constructor(uuid) {
+    this.db2conn = ibmdb.openSync(DB2CONNECTSTRING);
     this.transaction = false;
     this.uuid = uuid || uuidv4();
   }
 
-  beginTransaction() {
-    return new Promise((resolve, reject) => {
-      log.debug(this.uuid, 'transaction開始');
-      this.db2conn.beginTransaction((err) => {
-        if (err) {
-          return reject(new DB2Error('beginTransaction', err, this));
-        }
-        this.transaction = true;
-        return resolve();
-      });
-    });
-  }
-
-  async insertByData(table, data) {
-    log.debug(this.uuid, 'insertByData', table, data);
-    let insertresult;
-    if (data.length === 0) {
-      throw new DataError(`insertByData for Table(${table}) with no data`);
+  async reConnectIfClose() {
+    if (!this.db2conn.connected) {
+      this.db2conn = await ibmdb.openSync(DB2CONNECTSTRING);
     }
-    if (data instanceof Array) {
-      const fieldnames = Object.keys(data[0]);
-      const sqlfields = fieldnames.join(',');
-      const sqlvalues = data.map((singlerec) => {
-        const singlevalues = fieldnames.map(fieldname => `'${singlerec[fieldname]}'`);
-        return `(${singlevalues.join(',')})`;
-      });
-      const sqlvaluesstring = sqlvalues.join(',');
-      const sql = `select * from FINAL TABLE(insert into ${table} (${sqlfields}) values ${sqlvaluesstring})`;
-      insertresult = await this.executeSql(sql);
-    } else {
-      const fieldnames = Object.keys(data);
-      const sqlfields = fieldnames.join(',');
-      const sqlvalues = '? ,'.repeat(fieldnames.length).slice(0, -1);
-      const sql = `select * from FINAL TABLE(insert into ${table} (${sqlfields}) values (${sqlvalues}))`;
-      const sqlparam = fieldnames.map(field => data[field]);
-      insertresult = await this.executeSql(sql, sqlparam);
-    }
-    return data instanceof Array ? insertresult : insertresult[0];
   }
 
-  // async selectByKey(table, key, ifLock) {
-  //   log.debug(this.uuid, 'selectByKey', table, key);
-  //   const result = await this.selectByCondition(table, key, ifLock);
-  //   if (result.length !== 1) {
-  //     throw new DataError(`selectByKey for Table(${table}) with condition ${JSON.stringify(key)} got ${result.length} record, responsdata can be found in errordata field`, result );
-  //   }
-  //   return result[0];
-  // }
-
-  async deleteByKey(table, key) {
-    log.debug(this.uuid, 'deleteByKey', table, key);
-    await this.deleteByCondition(table, key);
-    return null;
+  async clearData(tableName) {
+    await this.reConnectIfClose();
+    const sql = `DELETE FROM ${tableName}`;
+    await this.executeSql(sql, []);
   }
 
-  async updateByKey(table, key) {
-    this.executeSql('a', 'b');
-    return '';
+  async beginTransaction() {
+    await this.reConnectIfClose();
+    await this.db2conn.beginTransactionSync();
   }
 
-  async selectByCondition(table, condition, orderkeys, ifLock) {
-    log.debug(this.uuid, 'selectByCondition');
-    log.debug(table, condition, orderkeys, ifLock);
-    const ordersql = orderkeys instanceof Array ? util.filedsarray2Order(orderkeys) : '';
-    const localIfLock = orderkeys instanceof Array ? ifLock : orderkeys;
-    const locksql = localIfLock ? constdata.sqlLockString : '';
-    log.debug(this.uuid, 'selectByCondition', table, condition);
-    const preparedata = util.data2Where(condition);
-    log.debug(preparedata);
-    const sql = `select * FROM ${table} ${preparedata.sqlwhere} ${ordersql} ${locksql}`;
-    const result = await this.executeSql(sql, preparedata.sqlparam);
-    return preparedata ? result : [];
-  }
-
-  async updateByCondition(table, setkey, condition) {
-    log.debug(this.uuid, 'updateByCondition', setkey, condition);
-    this.executeSql('a', 'b');
-    return '';
-  }
-
-  // 删除talbe中符合condition对象条件的数据
-  // 如{a:1 , b:2} => where a=1 and b=2
-  async deleteByCondition(table, condition) {
-    log.debug(this.uuid, 'deleteByCondition', table, condition);
-    const preparedata = util.data2Where(condition);
-    log.debug(preparedata);
-    const sql = `delete FROM ${table} ${preparedata.sqlwhere}`;
-    const result = await this.executeSql(sql, preparedata.sqlparam);
-    return preparedata ? result : [];
-  }
-
-  executeSql(sql, data) {
-    return new Promise((resolve, reject) => {
+  async executeSql(sql, data) {
+    try {
+      await this.reConnectIfClose();
       const params = data || [];
-      log.debug(this.uuid, 'sql:', sql, 'params:', params);
-      this.db2conn.query(sql, params, (error, rows, sqlca) => {
-        log.debug(this.uuid, sqlca);
-        if (error) {
-          return reject(new DB2Error('executeSql', error, this, sql, data));
-        }
-        return resolve(rows);
-      });
-    });
-  }
-
-  rollBack() {
-    return new Promise((resolve, reject) => {
-      log.debug(this.uuid, 'rollBack');
-      this.db2conn.rollbackTransaction((error) => {
-        if (error) {
-          return reject(new DB2Error('rollBack', error, this));
-        }
-        return resolve('');
-      });
-    });
-  }
-
-  commitTransaction() {
-    return new Promise((resolve, reject) => {
-      if (!this.transaction) {
-        log.debug(this.uuid, 'no transcation found, just close the connection');
-        this.db2conn.close((closeerr) => {
-          if (closeerr) {
-            return reject(new DB2Error('commitTransaction', closeerr));
-          }
-          return resolve('');
-        });
+      log.info(this.uuid, 'sql : ', sql);
+      log.info(this.uuid, 'data : ', JSON.stringify(params));
+      const result = await this.db2conn.querySync(sql, params);
+      return result;
+    } catch (error) {
+      log.error(this.uuid, 'executeSql error', error);
+      if (this.transaction) {
+        log.info(this.uuid, 'rollback transcation');
+        await this.db2conn.rollbackTransactionSync();
       }
-      log.debug(this.uuid, 'commit開始');
-      this.db2conn.commitTransaction((err) => {
-        if (err) {
-          return reject(new DB2Error('commitTransaction', err));
-        }
-        log.error(err);
-        log.debug('close db2 connection');
-        this.db2conn.close((closeerr) => {
-          if (closeerr) {
-            return reject(new DB2Error('commitTransaction', closeerr));
-          }
-          return resolve('');
-        });
-        return resolve('');
-      });
-    });
+      throw error;
+    }
+  }
+
+  async executeNonQuery(sql, data) {
+    let result;
+    let resultdata;
+    let stmt;
+    try {
+      await this.reConnectIfClose();
+      stmt = this.db2conn.prepareSync(sql);
+      result = await stmt.executeSync(data);
+      resultdata = result.fetchAllSync({ fetchMode: 3 }); // Fetch data in Array mode.
+      return resultdata;
+    } catch (error) {
+      log.error(this.uuid, 'executeNonQuery:', error);
+      await this.db2conn.rollbackTransactionSync().catch(rberror => log.error(rberror));
+      throw error;
+    } finally {
+      await result.closeSync();
+      await stmt.closeSync();
+    }
+  }
+
+  async rollBack() {
+    log.info(this.uuid, 'rollback開始');
+    await this.db2conn.rollbackTransactionSync();
+  }
+
+  async closeDB() {
+    log.info(this.uuid, 'close db2 connection');
+    try {
+      await this.db2conn.closeSync();
+    } catch (err) {
+      log.error(this.uuid, 'close db2 connection error', err);
+    }
+    log.info(this.uuid, 'close db2 connection end');
+  }
+
+  async commitTransaction() {
+    try {
+      await this.reConnectIfClose();
+      log.info(this.uuid, 'commit transcation');
+      await this.db2conn.commitTransactionSync();
+      log.info(this.uuid, 'commit db2 connection');
+    } catch (err) {
+      log.info(this.uuid, `commit error: ${err}`);
+      throw err;
+    }
   }
 }
 module.exports = Database;
