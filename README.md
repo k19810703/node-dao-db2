@@ -98,4 +98,32 @@ async function bizProcess(database, uuid, data) {
 module.exports.bizProcess = transaction(bizProcess);
 ```
 
+Step4 创建业务处理入口(main.js)
+``` javascript
+const uuidv4 = require('uuid/v4');
+const { bizProcess } = require('./bizProcess');
+const { log } = require('../util/log');
+
+// 调用参数
+const testdata = {
+  userid: 'testuser',
+  password: '12345',
+  username: 'testusername',
+};
+
+// 调用业务处理
+bizProcess(uuidv4(), testdata)
+  .then(result => log.info(result))
+  .catch(error => log.error(error));
+```
+
+注意：使用前请定义以下环境变量
+```
+export DB2DATABASE=yourdatabasename
+export DB2HOSTNAME=databaseip
+export DB2UID=userid
+export DB2PWD=password
+export DB2PORT=port
+```
+
 类似retrieve， create等等内置方法使用说明 [参考API文档](https://github.com/k19810703/node-dao-db2/blob/master/APIDoc.md)
