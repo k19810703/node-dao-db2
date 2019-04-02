@@ -16,7 +16,7 @@ class Where {
       throw new UsageError('filename is not provided');
     }
     if (!(typeof fieldname === 'string')) {
-      throw new UsageError('filename is string');
+      throw new UsageError('filename should be a string');
     }
     let finalstr = '';
     if (this.sqls.length > 0) {

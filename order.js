@@ -9,7 +9,7 @@ class Order {
   }
 
   ordersql() {
-    let finalstr;
+    let finalstr = '';
     if (this.fields.length > 0) {
       finalstr = ` order by ${this.fields.join(',')} `;
     }

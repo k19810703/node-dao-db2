@@ -1,6 +1,6 @@
 {
   "name": "@cic-digital/node-dao-db2",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -22,7 +22,9 @@
       "!**/coverage/**",
       "!**/util/db2class.js",
       "!**/testutil/**",
-      "!**/Test/**"
+      "!**/Test/**",
+      "!temp.js",
+      "!database.js"
     ]
   },
   "repository": {

@@ -1,6 +1,4 @@
 const Joi = require('joi');
-// const _ = require('lodash');
-const moment = require('moment');
 const { UsageError } = require('../UserDefineError/unvalidUsage');
 const { DefaultBizError } = require('../UserDefineError/DefaultBizError');
 const { DataError } = require('../UserDefineError/dataError');
@@ -11,11 +9,10 @@ const { log } = require('./log');
 
 async function inputcheck(data, schema, strictMode) {
   let allowUnknown;
-  if (typeof strictMode !== 'boolean') {
-    throw new UsageError('inputcheck的第三参数必须是boolean型', strictMode);
-  }
-  if (!strictMode) {
+  if (strictMode === undefined) {
     allowUnknown = true;
+  } else if (typeof strictMode !== 'boolean') {
+    throw new UsageError('inputcheck的第三参数必须是boolean型', strictMode);
   } else {
     allowUnknown = !strictMode;
   }
@@ -122,66 +119,9 @@ function getFieldsFromObject(dataObject, fieldList, strictMode) {
   return newObject;
 }
 
-// function getBaseInsertSql(tablename, fields) {
-//   const fieldsstring = fields.join(',');
-//   const sql = `Insert into ${tablename} (${fieldsstring}) values`;
-//   return sql;
-// }
-
-
-function db2timestamp2moment(params) {
-  const params1 = params.substring(0, 10);
-  const parmas2 = params.substring(11, 19);
-  const parmas3 = parmas2.replace(/\./g, ':');
-  const time = `${params1} ${parmas3}`;
-  const newtime = moment.utc(time);
-  if (!newtime.isValid()) {
-    throw new UsageError(`${params}が日付形式ではありません`);
-  }
-  return newtime;
-}
-
-function db2timestampFormatForUI(db2timestamp) {
-  let result;
-  if (!db2timestamp) {
-    result = '';
-  } else {
-    result = db2timestamp2moment(db2timestamp).format('YYYY-MM-DD hh:mm:ss');
-  }
-  return result;
-}
-
-// 返回ts2 - ts1的差，单位：秒
-function momenttimestampgap(ts1, ts2) {
-  const gap = Math.round((ts2 - ts1) / 1000);
-  return gap;
-}
-
-// 返回ts2 - ts1的差，单位：秒
-function db2timestampgap(ts1, ts2) {
-  const momentts1 = db2timestamp2moment(ts1);
-  const momentts2 = db2timestamp2moment(ts2);
-  const gap = Math.round((momentts2 - momentts1) / 1000);
-  return gap;
-}
-
-function getCurrentTimestampString(paramformat) {
-  const format = paramformat || 'YYYY-MM-DD-hh.mm.ss.000000';
-  return moment().utc().format(format).toString();
-}
-
-function getCurrentTimestamp() {
-  return moment().utc();
-}
 
 module.exports.inputcheck = inputcheck;
 module.exports.data2Where = data2Where;
 module.exports.data2Set = data2Set;
 module.exports.data2Insert = data2Insert;
 module.exports.getFieldsFromObject = getFieldsFromObject;
-module.exports.db2timestamp2moment = db2timestamp2moment;
-module.exports.db2timestampgap = db2timestampgap;
-module.exports.momenttimestampgap = momenttimestampgap;
-module.exports.getCurrentTimestampString = getCurrentTimestampString;
-module.exports.getCurrentTimestamp = getCurrentTimestamp;
-module.exports.db2timestampFormatForUI = db2timestampFormatForUI;
