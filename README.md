@@ -64,6 +64,8 @@ module.exports.User = User;
 
 Step3 创建业务处理(bizProcess.js)
 
+业务处理无需做commit或者rollback处理，期间的异常会被装饰器transaction捕获后rollback，正常会由transaction方法commit
+
 ``` javascript
 const { transaction } = require('../index');
 const { log } = require('../util/log');

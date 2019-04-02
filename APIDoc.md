@@ -11,8 +11,14 @@
 *  [.bulkCreate(datas)](#bulkCreate)
 
 **更新**
+*  [.updateByCondition(keydata, setdata)](#updateByCondition)
+*  [.updateByKey(data)](#updateByKey)
+
 
 **删除**
+*  [.deleteByKey(data)](#deleteByKey)
+*  [.deleteByCondition(data)](#deleteByCondition)
+
 
 ### <a name="retrieveAll"></a> .retrieveAll(order)
 使用场景:抽出所有表数据
@@ -110,5 +116,49 @@ const data2 = {
 }
 datas.push(data1);
 datas.push(data2);
-const result = datamodel.create(datas);
+const result = datamodel.bulkCreate(datas);
 ```
+### <a name="updateByCondition"></a> .updateByCondition(searchKey, setdata)
+使用场景:根据条件更新数据库，返回数组更新完的数据(数组类型)
+
+参数searchKey的用法请参考[.retrieveCount(searchKey)](#retrieveCount)
+
+```javascript
+const { Order } = require('@cic-digital/node-dao-db2');
+const searchKey = {
+  a: 1,
+  b: 2,
+}
+const setdata = {
+  c: 3,
+  d: 4,
+}
+// 相当于update xxx set c = 3 , d = 4 where a = 1 and b =2
+const result = datamodel.updateByCondition(searchKey, setdata);
+```
+
+### <a name="updateByKey"></a> .updateByKey(data)
+使用场景:根据主key更新数据库，返回数组更新完的数据(非数组类型)，如果更新结果不是1条则报错
+
+参数searchKey的用法请参考[.retrieveCount(searchKey)](#retrieveCount)
+
+```javascript
+const { Order } = require('@cic-digital/node-dao-db2');
+const data = {
+  a: 1,
+  b: 2,
+  c: 3,
+  d: 4,
+}
+// 假设主key是a，c为数据库设定字段
+// 相当于update xxx set b = 3 , d = 4 where a = 1 
+const result = datamodel.updateByKey(data);
+```
+
+### <a name="deleteByKey"></a> .deleteByKey(data)
+用法同[.updateByKey(data)](#updateByKey)
+
+### <a name="deleteByCondition"></a> .deleteByCondition(data)
+用法同 [.updateByCondition(keydata, setdata)](#updateByCondition)
+
+如果有其他通用的方法希望在dataModel增加，请联系k19810703@163.com或提issue
