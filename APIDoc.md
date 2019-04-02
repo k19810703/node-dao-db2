@@ -161,4 +161,5 @@ const result = datamodel.updateByKey(data);
 ### <a name="deleteByCondition"></a> .deleteByCondition(data)
 用法同 [.updateByCondition(keydata, setdata)](#updateByCondition)
 
+# 最后
 如果有其他通用的方法希望在dataModel增加，请联系k19810703@163.com或提issue
