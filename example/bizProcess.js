@@ -2,6 +2,7 @@ const { transaction } = require('../index');
 const { log } = require('../util/log');
 const { User } = require('./bizModel');
 const { Where } = require('../index');
+const { Order } = require('../index');
 
 async function bizProcess(database, uuid, data) {
   log.info(uuid, 'bizProcess start');
@@ -21,7 +22,7 @@ async function bizProcess(database, uuid, data) {
     USERLEVEL: Where.base().greater(0).less(10),
   };
   // 根据检索条件搜索数据库获得返回结果
-  const searchresult = await user.retrieve(usersearchkey);
+  const searchresult = await user.retrieve(usersearchkey, Order.base().asc('USERID').desc('USERLEVEL'));
   log.info(uuid, 'searchresult', searchresult);
   log.info(uuid, 'bizProcess normal end');
   return searchresult;
