@@ -1,11 +1,13 @@
 const Joi = require('joi');
+
 const { UsageError } = require('../UserDefineError/unvalidUsage');
 const { DefaultBizError } = require('../UserDefineError/DefaultBizError');
 const { DataError } = require('../UserDefineError/dataError');
 
-const { Condition } = require('../index');
 
 const { log } = require('./log');
+const { Where } = require('../wherecondition');
+
 
 async function inputcheck(data, schema, strictMode) {
   let allowUnknown;
@@ -25,6 +27,7 @@ async function inputcheck(data, schema, strictMode) {
 
 function data2Where(data) {
   log.debug('data2Where input', JSON.stringify(data));
+  log.info('data2Where', Where);
   let result;
   if (!data) {
     result = {
@@ -39,7 +42,8 @@ function data2Where(data) {
     }
     const andconditions = fields.map((field) => {
       let singlecondition;
-      if (data[field] instanceof Condition) {
+
+      if (data[field] instanceof Where) {
         data[field].values.forEach(value => sqlparam.push(value));
         singlecondition = data[field].wheresql(field);
       } else {

@@ -3,7 +3,7 @@ const Joi = require('joi');
 const { DataModel } = require('../../dataModel');
 const Database = require('../../database');
 const { Order } = require('../../index');
-const { Condition } = require('../../index');
+const { Where } = require('../../index');
 
 const {
   dummyResponse,
@@ -508,12 +508,12 @@ module.exports.retrieveCountData = [
       {
         a: 1,
         b: 'abc',
-        c: Condition.base().like('a%c'),
-        d: Condition.base().greater('a'),
-        e: Condition.base().greaterequal('b'),
-        f: Condition.base().less('e'),
-        g: Condition.base().lessequal('f'),
-        h: Condition.base().greater(0).lessequal(99),
+        c: Where.base().like('a%c'),
+        d: Where.base().greater('a'),
+        e: Where.base().greaterequal('b'),
+        f: Where.base().less('e'),
+        g: Where.base().lessequal('f'),
+        h: Where.base().greater(0).lessequal(99),
       },
     ],
     output: {
@@ -755,7 +755,7 @@ module.exports.updateByConditionData = [
     input: [
       {
         a: 1,
-        b: Condition.base().greater(10),
+        b: Where.base().greater(10),
       },
       {
         b: 'bkey',
@@ -821,7 +821,7 @@ module.exports.deleteByConditionData = [
     input: [
       {
         a: 1,
-        b: Condition.base().greater(10),
+        b: Where.base().greater(10),
       },
     ],
     output: {
@@ -841,7 +841,7 @@ module.exports.deleteByConditionData = [
     input: [
       {
         x: 1,
-        y: Condition.base().greater(10),
+        y: Where.base().greater(10),
       },
     ],
     output: {

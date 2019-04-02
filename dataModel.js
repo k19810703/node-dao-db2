@@ -6,7 +6,7 @@ const { DefaultBizError } = require('./UserDefineError/DefaultBizError');
 const util = require('./util/commonUtil');
 const { StrictMode, sqlLockString } = require('./util/constdata');
 const { log } = require('./util/log');
-const { Order } = require('./index');
+const { Order } = require('./order');
 
 function getRetrieveParams(...args) {
   log.debug('getRetrieveParams', JSON.stringify(args));

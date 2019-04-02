@@ -61,4 +61,4 @@ class Where {
   }
 }
 
-module.exports = Where;
+module.exports.Where = Where;

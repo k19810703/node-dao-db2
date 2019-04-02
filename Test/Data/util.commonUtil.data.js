@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const { Condition } = require('../../index');
+const { Where } = require('../../index');
 
 
 module.exports.inputcheckData = [
@@ -99,12 +99,12 @@ module.exports.data2WhereData = [
       {
         a: 1,
         b: 'abc',
-        c: Condition.base().like('a%c'),
-        d: Condition.base().greater('a'),
-        e: Condition.base().greaterequal('b'),
-        f: Condition.base().less('e'),
-        g: Condition.base().lessequal('f'),
-        h: Condition.base().greater(0).lessequal(99),
+        c: Where.base().like('a%c'),
+        d: Where.base().greater('a'),
+        e: Where.base().greaterequal('b'),
+        f: Where.base().less('e'),
+        g: Where.base().lessequal('f'),
+        h: Where.base().greater(0).lessequal(99),
       },
     ],
     output: {
