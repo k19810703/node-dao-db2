@@ -98,4 +98,4 @@ async function bizProcess(database, uuid, data) {
 module.exports.bizProcess = transaction(bizProcess);
 ```
 
-类似retrieve， create等等内置方法使用说明 [参考API文档](https://github.com/hapijs/joi)
+类似retrieve， create等等内置方法使用说明 [参考API文档](https://github.com/k19810703/node-dao-db2/blob/master/APIDoc.md)
