@@ -1,47 +1,47 @@
-# dataModel API 文档
+# dataModel API Document
 
-**查找**
+**Retrieve**
 *  [.retrieveAll(order)](#retrieveAll)
 *  [.retrieveCount(searchKey)](#retrieveCount)
 *  [.retrieve(searchKey, count, order, IfLock)](#retrieve)
 *  [.retrieveOne(searchKey, count, order, IfLock)](#retrieveOne)
 
-**新增**
+**Create**
 *  [.create(data)](#create)
 *  [.bulkCreate(datas)](#bulkCreate)
 
-**更新**
+**Update**
 *  [.updateByCondition(keydata, setdata)](#updateByCondition)
 *  [.updateByKey(data)](#updateByKey)
 
 
-**删除**
+**Delete**
 *  [.deleteByKey(data)](#deleteByKey)
 *  [.deleteByCondition(data)](#deleteByCondition)
 
 
 ### <a name="retrieveAll"></a> .retrieveAll(order)
-使用场景:抽出所有表数据
+use case:retrieve all data from table
 
-参数order为排序类，非必须，之后所有用到order的都请参考这里
+parameter order is a class provided by this package，it's optional
 
 ```javascript
 const { Order } = require('@cic-digital/node-dao-db2');
-// 不指定排序
+// no order
 const result = datamodel.retrieveAll();
-// 指定排序 order by a,b desc 
+// order by a,b desc 
 const result = datamodel.retrieveAll(Order.base().asc('a').desc('b'));
 ```
 ### <a name="retrieveCount"></a> .retrieveCount(searchKey)
-使用场景:抽出指定条件的记录数
+use case:retrieve specify count records
 
-参数searchKey的用法请参考这里
+parameter "searchKey" can be found here
 
 ```javascript
 const { Where } = require('@cic-digital/node-dao-db2');
-// 不指定条件
+// search without condition
 const result = datamodel.retrieveAll();
-// 指定条件
+// search with condition eg:
 // where a = 1 and b = 2 and c like 'a%b'
 // and d > '1' and e >= '2',
 // and f < '3' and g <= '4',
@@ -59,40 +59,40 @@ const searchKey = {
 const result = datamodel.retrieveAll(searchKey);
 ```
 ### <a name="retrieve"></a> .retrieve(searchKey, count, order, IfLock)
-使用场景:抽出指定条件的记录，返回数组类型
+use case:retrieve records by condition，return array
 
-参数searchKey的用法请参考[.retrieveCount(searchKey)](#retrieveCount)
+parameter searchKey useage please check [.retrieveCount(searchKey)](#retrieveCount)
 
-参数order的用法请参考[.retrieveAll(order)](#retrieveAll)
+parameter order useage please check [.retrieveAll(order)](#retrieveAll)
 
-count为数字型，order为Order类的实例，IfLock为boolean型，除了必须的第一参数searchKey，后3个参数可以任意指定组合，但顺序不能变
+count should be number ，order should be instance of Order，IfLock shold be boolean，parameter searchKey is mandontory，other three parameters are optional, but should defined by order
 
 ```javascript
 const { Order } = require('@cic-digital/node-dao-db2');
-// 抽出指定条件的记录
+// retrieve by condition
 const result1 = datamodel.retrieve(searchKey);
-// 抽出指定条件的前count条记录
+// retrieve by condition and return first {count} records
 const searchKey = { a: 1 };
 const count = 2;
 const IfLock = true
 const order = Order.base().asc('a');
 const result2 = datamodel.retrieve(searchKey, count);
-// 抽出指定条件的记录，按order来排序
+// retrieve by condition with order
 const result3 = datamodel.retrieve(searchKey, order);
-// 抽出指定条件记录并锁住
+// retrieve by condition and lock
 const result4 = datamodel.retrieve(searchKey, IfLock);
-// 抽出指定条件的前count条记录，按order条件排序并锁定
+// retrieve and lock by condition for  first {count} records
 const result5 = datamodel.retrieve(searchKey, count, order, IfLock);
 ```
 
 ### <a name="retrieveOne"></a> .retrieveOne(searchKey, count, order, IfLock)
-使用场景:抽出指定条件的1条记录，返回单条记录(非数组),通常用于主key检索，检索结果不为1条时报错，用法同[.retrieve(searchKey, count, order, IfLock)](#retrieve)
+use case:retrieve the first record satisify search condition，return data object(not array),normally used by search by unique key, when search condition hit more than 1 record or hit no record raise error[.retrieve(searchKey, count, order, IfLock)](#retrieve)
 
 ### <a name="create"></a> .create(data)
-使用场景:创建单条记录，返回创建后的记录(非数组)
+use case:create single record and return created record(not array)
 
 ```javascript
-// 创建指定模型的数据，数据必须符合模型定义的schema
+// create data model , data should satisify schema check 
 const data = {
   a: 1,
   b: '2',
@@ -101,10 +101,10 @@ const result = datamodel.create(data);
 ```
 
 ### <a name="bulkCreate"></a> .bulkCreate(datas)
-使用场景:批量创建记录，返回创建后的记录(数组)
+use case:batch create records ，return all records created(array)
 
 ```javascript
-// 创建指定模型的数据，数据必须符合模型定义的schema
+// create data model , data should satisify schema check 
 const datas = []
 const data1 = {
   a: 1,
@@ -119,9 +119,9 @@ datas.push(data2);
 const result = datamodel.bulkCreate(datas);
 ```
 ### <a name="updateByCondition"></a> .updateByCondition(searchKey, setdata)
-使用场景:根据条件更新数据库，返回数组更新完的数据(数组类型)
+use case:update datas by condition，return all updated records(array)
 
-参数searchKey的用法请参考[.retrieveCount(searchKey)](#retrieveCount)
+parameter searchKey useage please check[.retrieveCount(searchKey)](#retrieveCount)
 
 ```javascript
 const { Order } = require('@cic-digital/node-dao-db2');
@@ -133,14 +133,14 @@ const setdata = {
   c: 3,
   d: 4,
 }
-// 相当于update xxx set c = 3 , d = 4 where a = 1 and b =2
+//update xxx set c = 3 , d = 4 where a = 1 and b =2
 const result = datamodel.updateByCondition(searchKey, setdata);
 ```
 
 ### <a name="updateByKey"></a> .updateByKey(data)
-使用场景:根据主key更新数据库，返回数组更新完的数据(非数组类型)，如果更新结果不是1条则报错
+use case:update by unique key，return updated record(not array)，if search condition hit more than 1 record or hit no record , will not update and raise error
 
-参数searchKey的用法请参考[.retrieveCount(searchKey)](#retrieveCount)
+parameter searchKey useage please check[.retrieveCount(searchKey)](#retrieveCount)
 
 ```javascript
 const { Order } = require('@cic-digital/node-dao-db2');
@@ -150,16 +150,16 @@ const data = {
   c: 3,
   d: 4,
 }
-// 假设主key是a，c为数据库设定字段
-// 相当于update xxx set b = 3 , d = 4 where a = 1 
+// in this case a is unique key and c is auto setting field
+// update xxx set b = 3 , d = 4 where a = 1 
 const result = datamodel.updateByKey(data);
 ```
 
 ### <a name="deleteByKey"></a> .deleteByKey(data)
-用法同[.updateByKey(data)](#updateByKey)
+same as[.updateByKey(data)](#updateByKey)
 
 ### <a name="deleteByCondition"></a> .deleteByCondition(data)
-用法同 [.updateByCondition(keydata, setdata)](#updateByCondition)
+same as [.updateByCondition(keydata, setdata)](#updateByCondition)
 
-# 最后
-如果有其他通用的方法希望在dataModel增加，请联系k19810703@163.com或提issue
+# from Owner
+any new requirement , please raise issue or contact k19810703@163.com

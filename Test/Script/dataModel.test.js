@@ -1,4 +1,5 @@
 /* eslint-env jest */
+const { commonErrorCheck, commonReturnValueCheck, commonMockFunCheck } = require('./testfunction');
 const Database = require('../../database');
 const {
   dummyResponse,
@@ -41,6 +42,7 @@ describe('datamodel测试', () => {
           if (testdata.output.errMsg) {
             expect(error.message).toBe(testdata.output.errMsg);
           }
+          // commonErrorCheck(error, testdata.output);
         }
         if (normalcase) {
           expect(false).toBe(testdata.output.isError);
@@ -101,20 +103,24 @@ describe('datamodel测试', () => {
         const database = new Database();
         const model = new testdata.initialize.BizModel(database);
         let result;
+        let normalcase = false;
         try {
           result = await model.retrieveAll(...testdata.input);
+          normalcase = true;
         } catch (error) {
           expect(true).toBe(testdata.check.isError);
           expect(error.message).toBe(testdata.check.errMsg);
         }
-        if (testdata.check.returnvalue) {
-          expect(result).toEqual(expect.objectContaining(dummyResponse));
-        }
-        if (testdata.check.executeSqlParam1) {
-          expect(
-            Database.prototype.executeSql.mock.calls[0][0],
-          ).toBe(testdata.check.executeSqlParam1);
-        }
+        commonReturnValueCheck(normalcase, result, testdata.check);
+        // if (testdata.check.returnvalue) {
+        //   expect(result).toEqual(expect.objectContaining(dummyResponse));
+        // }
+        commonMockFunCheck(Database.prototype.executeSql, testdata.executeSqlMock);
+        // if (testdata.check.executeSqlParam1) {
+        //   expect(
+        //     Database.prototype.executeSql.mock.calls[0][0],
+        //   ).toBe(testdata.check.executeSqlParam1);
+        // }
       });
     },
   );

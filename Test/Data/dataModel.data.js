@@ -185,8 +185,13 @@ module.exports.retrieveAllData = [
     ],
     check: {
       isError: false,
-      executeSqlParam1: 'select * from testtable ',
       returnvalue: dummyResponse,
+    },
+    executeSqlMock: {
+      isCalled: true,
+      expectParam: [
+        'select * from testtable ',
+      ],
     },
   },
   {
@@ -200,8 +205,13 @@ module.exports.retrieveAllData = [
     ],
     check: {
       isError: false,
-      executeSqlParam1: 'select * from testtable  order by a ',
       returnvalue: dummyResponse,
+    },
+    executeSqlMock: {
+      isCalled: true,
+      expectParam: [
+        'select * from testtable  order by a ',
+      ],
     },
   },
   {
@@ -215,9 +225,13 @@ module.exports.retrieveAllData = [
     ],
     check: {
       isError: false,
-      executeSqlParam1: 'select * from testtable  order by a desc,b ',
       returnvalue: dummyResponse,
-
+    },
+    executeSqlMock: {
+      isCalled: true,
+      expectParam: [
+        'select * from testtable  order by a desc,b ',
+      ],
     },
   },
   {
@@ -234,6 +248,9 @@ module.exports.retrieveAllData = [
     check: {
       isError: true,
       errMsg: 'retrieveAll的参数必须是Order对象的实例',
+    },
+    executeSqlMock: {
+      isCalled: false,
     },
   },
 ];

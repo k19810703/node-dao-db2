@@ -1,21 +1,17 @@
-# node-db2 data access component
+# node-db2数据访问组件
 
-[Chinese](README_CN.md)
+##  node-db2数据访问组件,方便用户快速构建db2数据库访问模块,提高程序的可读性
 
-
-##  this package can help user easy build db2 data access object
-
-### How to use
+### 用法
 
 ####  install
 ```
 npm install --save @cic-digital/node-dao-db2
 ```
-
 ####  QuickStart
-example can be found in ./example
+这里的example可以在example目录下找到
 
-Step1 create business model, for example: user, define ddl first
+Step1 创建业务模型，比如我们需要一个模型：用户，有如下的ddl
 ```
 CREATE TABLE user (
    userid    VARCHAR(100) NOT NULL,
@@ -26,19 +22,19 @@ CREATE TABLE user (
    PRIMARY KEY (userid));
 ```
 
-Step2 based on this business model , create a datamodel(bizModel.js)
+Step2 根据业务模型，创建对应的数据模型(bizModel.js)
 
 ``` javascript
-// schema check package
+// 引入schema配置包
 const Joi = require('joi');
-// require base datamodel module
+// 引入数据模型基础类
 const { DataModel } = require('../dataModel');
 
-// define user class extend base datamodel
+// 创建用户类继续基础模型
 class User extends DataModel {
   constructor(database) {
     super(database);
-    // define schema
+    // 根据ddl创建schema
     this.fullschema = {
       USERID: Joi.string().max(100).required(),
       PASSWORD: Joi.string().max(50).required(),
@@ -46,15 +42,15 @@ class User extends DataModel {
       USERLEVEL: Joi.string().valid('0', '1', '2', '3'),
       UPDATETIMESTAMP: Joi.string(),
     };
-    // define unique key
+    // 指定主key
     this.keyfieldlist = ['USERID'];
-    // define auto setting field list
+    // 指定数据库设定字段
     this.autosetlist = ['UPDATETIMESTAMP'];
-    // define table name
+    // 指定表名
     this.tablename = 'USER';
   }
 
-  // your customize function goes here
+  // 复杂处理可以自行定义方法
   async mycustomfunction() {
     const sql = `select * from ${this.tablename} where USERID = ?`;
     const result = await this.database.executeSql(sql, ['userid']);
@@ -64,11 +60,11 @@ class User extends DataModel {
 
 module.exports.User = User;
 ```
-[schema usage](https://github.com/hapijs/joi)
+[schema定义方法参考](https://github.com/hapijs/joi)
 
-Step3 create your business process module(bizProcess.js)
+Step3 创建业务处理(bizProcess.js)
 
-you don't need handle commit or rollback in your buisiness process，all you need to do is add transaction to your export.
+业务处理无需做commit或者rollback处理，期间的异常会被装饰器transaction捕获后rollback，正常会由transaction方法commit
 
 ``` javascript
 const { transaction } = require('../index');
@@ -79,51 +75,51 @@ const { Where } = require('../index');
 async function bizProcess(database, uuid, data) {
   log.info(uuid, 'bizProcess start');
   const user = new User(database);
-  // define new user data
+  // 设定用户记录信息
   const newuser = {
     USERID: data.userid,
     PASSWORD: data.password,
     USERNAME: data.username,
     USERLEVEL: '1',
   };
-  // create user record 
+  // 创建用户的记录
   const newuserdata = await user.create(newuser);
   log.info('newuserdata', newuserdata);
-  // define search key, in this case, search condition was set to USERLEVEL >0 AND USERLEVEL < 10
+  // 设置检索key, 本例为 USERLEVEL >0 AND USERLEVEL < 10
   const usersearchkey = {
     USERLEVEL: Where.base().greater(0).less(10),
   };
-  // get search result
+  // 根据检索条件搜索数据库获得返回结果
   const searchresult = await user.retrieve(usersearchkey);
   log.info(uuid, 'searchresult', searchresult);
   log.info(uuid, 'bizProcess normal end');
   return searchresult;
 }
 
-// export your business process and claim it to be transaction
+// 申明业务处理需要transaction
 module.exports.bizProcess = transaction(bizProcess);
 ```
 
-Step4 create your main process module(main.js)
+Step4 创建业务处理入口(main.js)
 ``` javascript
 const uuidv4 = require('uuid/v4');
 const { bizProcess } = require('./bizProcess');
 const { log } = require('../util/log');
 
-// parameter
+// 调用参数
 const testdata = {
   userid: 'testuser',
   password: '12345',
   username: 'testusername',
 };
 
-// call your business process
+// 调用业务处理
 bizProcess(uuidv4(), testdata)
   .then(result => log.info(result))
   .catch(error => log.error(error));
 ```
 
-*before you use this package , please define below enviroment
+注意：使用前请定义以下环境变量
 ```
 export DB2DATABASE=yourdatabasename
 export DB2HOSTNAME=databaseip
@@ -132,4 +128,4 @@ export DB2PWD=password
 export DB2PORT=port
 ```
 
-pre-defined api like retrieve， create [API Doc](https://github.com/k19810703/node-dao-db2/blob/master/APIDoc.md)
+类似retrieve， create等等内置方法使用说明 [参考API文档](https://github.com/k19810703/node-dao-db2/blob/master/APIDoc.md)
